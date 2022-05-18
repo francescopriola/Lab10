@@ -1,8 +1,11 @@
 package it.polito.tdp.rivers.db;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import it.polito.tdp.rivers.model.Flow;
 import it.polito.tdp.rivers.model.River;
 
 import java.sql.Connection;
@@ -12,11 +15,11 @@ import java.sql.SQLException;
 
 public class RiversDAO {
 
-	public List<River> getAllRivers() {
+	public Map<Integer, River> getAllRivers() {
 		
 		final String sql = "SELECT id, name FROM river";
 
-		List<River> rivers = new LinkedList<River>();
+		Map<Integer, River> rivers = new HashMap<Integer, River>();
 
 		try {
 			Connection conn = DBConnect.getConnection();
@@ -24,7 +27,8 @@ public class RiversDAO {
 			ResultSet res = st.executeQuery();
 
 			while (res.next()) {
-				rivers.add(new River(res.getInt("id"), res.getString("name")));
+				River r = new River(res.getInt("id"), res.getString("name"));
+				rivers.put(r.getId(), r);
 			}
 
 			conn.close();
@@ -36,4 +40,29 @@ public class RiversDAO {
 
 		return rivers;
 	}
+	
+	public List<Flow> getFlowsByRiver(Map<Integer, River> idMap, int riverId){
+		String sqlString = "SELECT * "
+				+ "FROM flow "
+				+ "WHERE river = ? ";
+		
+		List<Flow> result = new ArrayList<>();
+		Connection conn = DBConnect.getConnection();
+		try {
+			PreparedStatement st = conn.prepareStatement(sqlString);
+			st.setInt(1, riverId);
+			ResultSet rs = st.executeQuery();
+			
+			while(rs.next()) {
+				Flow f = new Flow(rs.getDate("day").toLocalDate(), rs.getDouble("flow"), idMap.get(rs.getInt("river")));
+				result.add(f);
+			}
+			
+			conn.close();
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	} 
 }
