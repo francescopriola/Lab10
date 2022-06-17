@@ -56,6 +56,10 @@ public class FXMLController {
 
     @FXML
     void doCheckRiver(ActionEvent event) {
+    	txtStartDate.clear();
+    	txtEndDate.clear();
+    	txtNumMeasurements.clear();
+    	txtFMed.clear();
     	river = boxRiver.getValue();
     	double somma = 0;
     	double m = 0.0;
@@ -71,6 +75,12 @@ public class FXMLController {
     	m = somma/(flows.size()-1);
     	fMed = Math.round(m*100.0)/100.0;
     	txtFMed.appendText(fMed+ "");
+    }
+    
+    @FXML
+    void doSimula(ActionEvent event) {
+    	double d = model.simula(river.getId());
+    	
     }
     
     @FXML // This method is called by the FXMLLoader when initialization is complete
